@@ -3,21 +3,37 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"todo-app/handler"
 	"todo-app/infra"
 	"todo-app/usecase"
 
+	"github.com/guregu/dynamo"
 	"github.com/labstack/echo/v4"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	echolamda "github.com/awslabs/aws-lambda-go-api-proxy/echo"
 )
 
 var echoLambda *echolamda.EchoLambda
 
 func init() {
-	todoRepo := infra.NewTodoDB()
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("ap-northeast-1"),
+		Endpoint:    aws.String(os.Getenv("DYNAMO_ENDPOINT")),
+		Credentials: credentials.NewStaticCredentials("dummy", "dummy", "dummy"),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	db := dynamo.New(sess)
+
+	todoRepo := infra.NewTodoDB(db)
 	todoUc := usecase.NewTodoUseCase(todoRepo)
 	controller := handler.NewController(todoUc)
 
