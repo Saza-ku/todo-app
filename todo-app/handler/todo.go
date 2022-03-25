@@ -13,6 +13,7 @@ func NewController(uc usecase.TodoUseCase) Controller {
 
 type Controller interface {
 	GetTodo(echo.Context) error
+	AddTodo(echo.Context) error
 }
 
 type controller struct {
@@ -20,6 +21,21 @@ type controller struct {
 }
 
 func (ctr *controller) GetTodo(c echo.Context) error {
-	todos := ctr.todoUseCase.GetTodo()
-	return c.JSON(http.StatusOK, todos)
+	todoList, err := ctr.todoUseCase.GetTodo()
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, todoListToDTO(todoList))
+}
+
+func (ctr *controller) AddTodo(c echo.Context) error {
+	todo := new(todoForm)
+	if err := c.Bind(todo); err != nil {
+		return err
+	}
+	newTodo, err := ctr.todoUseCase.AddTodo(todoToDomain(todo))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, todoToDTO(newTodo))
 }

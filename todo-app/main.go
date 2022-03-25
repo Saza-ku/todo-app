@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 	"todo-app/handler"
 	"todo-app/infra"
 	"todo-app/usecase"
@@ -24,7 +23,6 @@ var echoLambda *echolamda.EchoLambda
 func init() {
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("ap-northeast-1"),
-		Endpoint:    aws.String(os.Getenv("DYNAMO_ENDPOINT")),
 		Credentials: credentials.NewStaticCredentials("dummy", "dummy", "dummy"),
 	})
 	if err != nil {
@@ -41,6 +39,7 @@ func init() {
 
 	e := echo.New()
 	e.GET("/todo", controller.GetTodo)
+	e.POST("/todo", controller.AddTodo)
 	echoLambda = echolamda.New(e)
 }
 
