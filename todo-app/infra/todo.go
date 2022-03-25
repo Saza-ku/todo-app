@@ -1,31 +1,26 @@
 package infra
 
-import "todo-app/domain"
+import (
+	"todo-app/domain"
+
+	"github.com/guregu/dynamo"
+)
 
 type TodoDB interface {
 	GetTodo() []*domain.Todo
 }
 
-type todoDB struct{}
+type todoDB struct {
+	table dynamo.Table
+}
 
-func NewTodoDB() TodoDB {
-	return &todoDB{}
+func NewTodoDB(db *dynamo.DB) TodoDB {
+	table := db.Table("Todo")
+	return &todoDB{table: table}
 }
 
 func (db *todoDB) GetTodo() []*domain.Todo {
-	return []*domain.Todo{
-		{
-			ID:          1,
-			Name:        "ご飯を作る",
-			Description: "今日は唐揚げ",
-		}, {
-			ID:          2,
-			Name:        "買い物",
-			Description: "お肉とキャベツ",
-		}, {
-			ID:          3,
-			Name:        "本を返す",
-			Description: "SQLアンチパターンと蟻本",
-		},
-	}
+	var todoList []*domain.Todo
+	db.table.Scan().All(&todoList)
+	return todoList
 }
