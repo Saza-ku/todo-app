@@ -31,6 +31,24 @@ Resources:
       DockerContext: ./todo-app
       Dockerfile: Dockerfile.production
 
+  TodoTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: Todo
+      AttributeDefinitions: 
+        - AttributeName: ID
+          AttributeType: N
+        - AttributeName: Name
+          AttributeType: S
+        - AttributeName: Description
+          AttributeType: S
+        - AttributeName: Status
+          AttributeType: S
+      KeySchema: 
+        - AttributeName: ID
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
