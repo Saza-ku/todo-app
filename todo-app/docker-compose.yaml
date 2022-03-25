@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+    tty: true
+    stdin_open: true
+    volumes:
+      - .:/src/app/
+    ports:
+      - 9000:8080
