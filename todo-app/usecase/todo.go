@@ -1,6 +1,10 @@
 package usecase
 
-import "todo-app/domain"
+import (
+	"fmt"
+	"log"
+	"todo-app/domain"
+)
 
 type TodoUseCase interface {
 	GetTodo() ([]*domain.Todo, error)
@@ -20,13 +24,21 @@ func (uc *todoUseCase) GetTodo() ([]*domain.Todo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return todoList, err
+	return todoList, nil
 }
 
 func (uc *todoUseCase) AddTodo(todo *domain.Todo) (*domain.Todo, error) {
-	todo, err := uc.AddTodo(todo)
+	log.Printf("start add todo")
+	fmt.Println(todo.Name)
+	todo, err := uc.todoRepo.AddTodo(todo)
+	log.Printf("adding todo end")
 	if err != nil {
+		log.Printf("error while adding todo")
 		return nil, err
 	}
+	return todo, nil
+}
+
+func (uc *todoUseCase) EditTodo(todo *domain.Todo) (*domain.Todo, error) {
 	return todo, nil
 }

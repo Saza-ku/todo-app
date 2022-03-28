@@ -34,3 +34,8 @@ func TodoToInfra(t *domain.Todo) *todo {
 		Status:      t.Status,
 	}
 }
+
+type sequence struct {
+	Name string
+	ID   int
+}

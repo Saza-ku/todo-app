@@ -1,28 +1,37 @@
 package handler
 
-import "todo-app/domain"
+import (
+	"net/http"
+	"todo-app/domain"
+
+	"github.com/labstack/echo/v4"
+)
 
 type todoDTO struct {
-	id          int
-	name        string
-	description string
-	status      string
+	Id          int    `json:"ID"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
 }
 
 type todoListDTO []*todoDTO
 
 type todoForm struct {
-	name        string
-	description string
-	status      string
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
+}
+
+type message struct {
+	message string
 }
 
 func todoToDTO(todo *domain.Todo) *todoDTO {
 	return &todoDTO{
-		id:          todo.ID,
-		name:        todo.Name,
-		description: todo.Description,
-		status:      todo.Status,
+		Id:          todo.ID,
+		Name:        todo.Name,
+		Description: todo.Description,
+		Status:      todo.Status,
 	}
 }
 
@@ -36,8 +45,16 @@ func todoListToDTO(list []*domain.Todo) todoListDTO {
 
 func todoToDomain(todo *todoForm) *domain.Todo {
 	return &domain.Todo{
-		Name:        todo.name,
-		Description: todo.description,
-		Status:      todo.description,
+		Name:        todo.Name,
+		Description: todo.Description,
+		Status:      todo.Description,
 	}
+}
+
+func errorResponse(c echo.Context, err error) error {
+	return c.JSON(http.StatusInternalServerError, struct {
+		message string
+	}{
+		message: err.Error(),
+	})
 }
