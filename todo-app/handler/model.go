@@ -17,13 +17,14 @@ type todoDTO struct {
 type todoListDTO []*todoDTO
 
 type todoForm struct {
+	ID          int    `param:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
 }
 
 type message struct {
-	message string
+	Message string `json:"message"`
 }
 
 func todoToDTO(todo *domain.Todo) *todoDTO {
@@ -31,24 +32,29 @@ func todoToDTO(todo *domain.Todo) *todoDTO {
 		Id:          todo.ID,
 		Name:        todo.Name,
 		Description: todo.Description,
-		Status:      todo.Status,
+		Status:      string(todo.Status),
 	}
 }
 
 func todoListToDTO(list []*domain.Todo) todoListDTO {
 	todoList := make(todoListDTO, len(list), len(list))
-	for _, todo := range list {
-		todoList = append(todoList, todoToDTO(todo))
+	for i, todo := range list {
+		todoList[i] = todoToDTO(todo)
 	}
 	return todoList
 }
 
-func todoToDomain(todo *todoForm) *domain.Todo {
-	return &domain.Todo{
+func todoToDomain(todo *todoForm) (*domain.Todo, error) {
+	domainTodo := &domain.Todo{
+		ID:          todo.ID,
 		Name:        todo.Name,
 		Description: todo.Description,
-		Status:      todo.Description,
+		Status:      domain.Status(todo.Status),
 	}
+	if err := domainTodo.Status.Validate(); err != nil {
+		return nil, err
+	}
+	return domainTodo, nil
 }
 
 func errorResponse(c echo.Context, err error) error {

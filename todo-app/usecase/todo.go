@@ -1,14 +1,14 @@
 package usecase
 
 import (
-	"fmt"
-	"log"
 	"todo-app/domain"
 )
 
 type TodoUseCase interface {
 	GetTodo() ([]*domain.Todo, error)
 	AddTodo(*domain.Todo) (*domain.Todo, error)
+	EditTodo(*domain.Todo) (*domain.Todo, error)
+	RemoveTodo(int) error
 }
 
 type todoUseCase struct {
@@ -22,23 +22,47 @@ func NewTodoUseCase(r domain.TodoRepository) TodoUseCase {
 func (uc *todoUseCase) GetTodo() ([]*domain.Todo, error) {
 	todoList, err := uc.todoRepo.GetTodo()
 	if err != nil {
-		return nil, err
+		return nil, domain.NewInfraError(err)
 	}
 	return todoList, nil
 }
 
 func (uc *todoUseCase) AddTodo(todo *domain.Todo) (*domain.Todo, error) {
-	log.Printf("start add todo")
-	fmt.Println(todo.Name)
 	todo, err := uc.todoRepo.AddTodo(todo)
-	log.Printf("adding todo end")
 	if err != nil {
-		log.Printf("error while adding todo")
-		return nil, err
+		return nil, domain.NewInfraError(err)
 	}
 	return todo, nil
 }
 
 func (uc *todoUseCase) EditTodo(todo *domain.Todo) (*domain.Todo, error) {
-	return todo, nil
+	exists, err := uc.todoRepo.ExistsTodo(todo.ID)
+	if err != nil {
+		return nil, domain.NewInfraError(err)
+	}
+	if !exists {
+		return nil, domain.NewNotFoundError(todo.ID)
+	}
+
+	editedTodo, err := uc.todoRepo.EditTodo(todo)
+	if err != nil {
+		return nil, domain.NewInfraError(err)
+	}
+	return editedTodo, nil
+}
+
+func (uc *todoUseCase) RemoveTodo(id int) error {
+	exists, err := uc.todoRepo.ExistsTodo(id)
+	if err != nil {
+		return domain.NewInfraError(err)
+	}
+	if !exists {
+		return domain.NewNotFoundError(id)
+	}
+
+	err = uc.todoRepo.RemoveTodo(id)
+	if err != nil {
+		return domain.NewInfraError(err)
+	}
+	return nil
 }

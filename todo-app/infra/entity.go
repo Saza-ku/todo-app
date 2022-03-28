@@ -1,6 +1,8 @@
 package infra
 
-import "todo-app/domain"
+import (
+	"todo-app/domain"
+)
 
 type todo struct {
 	ID          int
@@ -14,14 +16,14 @@ func TodoToDomain(todo *todo) *domain.Todo {
 		ID:          todo.ID,
 		Name:        todo.Name,
 		Description: todo.Description,
-		Status:      todo.Status,
+		Status:      domain.Status(todo.Status),
 	}
 }
 
 func TodoListToDomain(list []*todo) []*domain.Todo {
 	todoList := make([]*domain.Todo, len(list), len(list))
-	for _, todo := range list {
-		todoList = append(todoList, TodoToDomain(todo))
+	for i, todo := range list {
+		todoList[i] = TodoToDomain(todo)
 	}
 	return todoList
 }
@@ -31,7 +33,7 @@ func TodoToInfra(t *domain.Todo) *todo {
 		ID:          t.ID,
 		Name:        t.Name,
 		Description: t.Description,
-		Status:      t.Status,
+		Status:      string(t.Status),
 	}
 }
 

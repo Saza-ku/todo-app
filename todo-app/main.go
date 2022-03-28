@@ -46,6 +46,8 @@ func init() {
 	})
 	e.GET("/todo", controller.GetTodo)
 	e.POST("/todo", controller.AddTodo)
+	e.PUT("/todo/:id", controller.EditTodo)
+	e.DELETE("/todo/:id", controller.RemoveTodo)
 	echoLambda = echolamda.New(e)
 }
 
