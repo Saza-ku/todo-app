@@ -7,44 +7,44 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type todoDTO struct {
-	Id          int    `json:"ID"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Status      string `json:"status"`
+type TodoDTO struct {
+	ID          int    `json:"id" example:"1"`
+	Name        string `json:"name" example:"掃除"`
+	Description string `json:"description" example:"部屋とお風呂"`
+	Status      string `json:"status" enums:"new,wip,todo" example:"new"`
 }
 
-type todoListDTO []*todoDTO
+type TodoListDTO []*TodoDTO
 
-type todoForm struct {
-	ID          int    `param:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Status      string `json:"status"`
+type TodoForm struct {
+	ID          int    `json:"id" swaggerignore:"true"`
+	Name        string `json:"name" example:"掃除"`
+	Description string `json:"description" example:"部屋とお風呂"`
+	Status      string `json:"status" enums:"new,wip,todo" example:"new"`
 }
 
-type message struct {
+type Message struct {
 	Message string `json:"message"`
 }
 
-func todoToDTO(todo *domain.Todo) *todoDTO {
-	return &todoDTO{
-		Id:          todo.ID,
+func todoToDTO(todo *domain.Todo) *TodoDTO {
+	return &TodoDTO{
+		ID:          todo.ID,
 		Name:        todo.Name,
 		Description: todo.Description,
 		Status:      string(todo.Status),
 	}
 }
 
-func todoListToDTO(list []*domain.Todo) todoListDTO {
-	todoList := make(todoListDTO, len(list), len(list))
+func todoListToDTO(list []*domain.Todo) TodoListDTO {
+	todoList := make(TodoListDTO, len(list), len(list))
 	for i, todo := range list {
 		todoList[i] = todoToDTO(todo)
 	}
 	return todoList
 }
 
-func todoToDomain(todo *todoForm) (*domain.Todo, error) {
+func todoToDomain(todo *TodoForm) (*domain.Todo, error) {
 	domainTodo := &domain.Todo{
 		ID:          todo.ID,
 		Name:        todo.Name,

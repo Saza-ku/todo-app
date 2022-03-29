@@ -55,6 +55,17 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	return echoLambda.ProxyWithContext(ctx, req)
 }
 
+// @title           Todo API
+// @version         1.0
+// @description     This is a Todo-app server.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  s_ueda@yumemi.co.jp
+
+// @host      localhost:8080
+// @BasePath  /
 func main() {
 	lambda.Start(Handler)
 }

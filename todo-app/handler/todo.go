@@ -25,6 +25,13 @@ type controller struct {
 	todoUseCase usecase.TodoUseCase
 }
 
+// @Summary  Get all todo
+// @Tags     todo
+// @Accept   json
+// @Produce  json
+// @Success  200  {object}  handler.TodoListDTO
+// @Failure  500  {object}  handler.Message
+// @Router   /todo [get]
 func (ctr *controller) GetTodo(c echo.Context) error {
 	todoList, err := ctr.todoUseCase.GetTodo()
 	if err != nil {
@@ -35,11 +42,20 @@ func (ctr *controller) GetTodo(c echo.Context) error {
 	return c.JSON(http.StatusOK, todoListToDTO(todoList))
 }
 
+// @Summary  Add a todo
+// @Tags     todo
+// @Accept   json
+// @Produce  json
+// @Param    todo  body      handler.TodoForm  true  "new todo"
+// @Success  200   {object}  handler.TodoListDTO
+// @Failure  400   {object}  handler.Message
+// @Failure  500   {object}  handler.Message
+// @Router   /todo [post]
 func (ctr *controller) AddTodo(c echo.Context) error {
-	todoForm := new(todoForm)
+	todoForm := new(TodoForm)
 	if err := c.Bind(todoForm); err != nil {
 		return c.JSON(http.StatusBadRequest,
-			message{
+			Message{
 				Message: fmt.Sprintf("validation failed: %s", err.Error()),
 			})
 	}
@@ -57,11 +73,22 @@ func (ctr *controller) AddTodo(c echo.Context) error {
 	return c.JSON(http.StatusOK, todoToDTO(newTodo))
 }
 
+// @Summary  Edit a todo
+// @Tags     todo
+// @Accept   json
+// @Produce  json
+// @Param    todo  body      handler.TodoForm  true  "edited todo"
+// @Param    id    path      int               true  "id of todo to edit"
+// @Success  200   {object}  handler.TodoListDTO
+// @Failure  400   {object}  handler.Message
+// @Failure  404   {object}  handler.Message
+// @Failure  500   {object}  handler.Message
+// @Router   /todo/{id} [put]
 func (ctr *controller) EditTodo(c echo.Context) error {
-	todoForm := new(todoForm)
+	todoForm := new(TodoForm)
 	if err := c.Bind(todoForm); err != nil {
 		return c.JSON(http.StatusBadRequest,
-			message{
+			Message{
 				Message: fmt.Sprintf("validation failed: %s", err.Error()),
 			})
 	}
@@ -79,12 +106,21 @@ func (ctr *controller) EditTodo(c echo.Context) error {
 	return c.JSON(http.StatusOK, editedTodo)
 }
 
+// @Summary  Remove a todo
+// @Tags     todo
+// @Accept   json
+// @Produce  json
+// @Param    id   path      int  true  "id of todo to remove"
+// @Success  200  {object}  handler.Message
+// @Failure  404  {object}  handler.Message
+// @Failure  500  {object}  handler.Message
+// @Router   /todo/{id} [delete]
 func (ctr *controller) RemoveTodo(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest,
-			message{
+			Message{
 				Message: fmt.Sprintf("validation failed: %s", err.Error()),
 			})
 	}
@@ -94,7 +130,7 @@ func (ctr *controller) RemoveTodo(c echo.Context) error {
 		return handleError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, message{
+	return c.JSON(http.StatusOK, Message{
 		Message: fmt.Sprintf("Todo %d has removed", id),
 	})
 }
@@ -103,22 +139,22 @@ func handleError(c echo.Context, e error) error {
 	switch err := e.(type) {
 	case *domain.NotFoundError:
 		return c.JSON(http.StatusNotFound,
-			message{
+			Message{
 				Message: err.Error(),
 			})
 	case *domain.InfraError:
 		return c.JSON(http.StatusInternalServerError,
-			message{
+			Message{
 				Message: err.Error(),
 			})
 	case *domain.InvalidRequestError:
 		return c.JSON(http.StatusBadRequest,
-			message{
+			Message{
 				Message: err.Error(),
 			})
 	default:
 		return c.JSON(http.StatusInternalServerError,
-			message{
+			Message{
 				Message: err.Error(),
 			})
 	}
