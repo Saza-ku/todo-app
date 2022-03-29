@@ -33,13 +33,20 @@ jobs:
         run: |
           echo "$DEPLOY_KEY" > ~/deploy_key.pem
           chmod 600 ~/deploy_key.pem
+          cd ../
           git clone git@github.com:Saza-ku/swagger-ui.git
+      
+      - name: ls and pwd
+        run: |
+          ls
+          pwd
 
-      - name: Deploy pages
+      - name: push to swagger ui repository
         env:
           GIT_SSH_COMMAND: ssh -i ~/deploy_key.pem -o StrictHostKeyChecking=no -F /dev/null
         run: |
-          cp ./todo-app/docs/swagger.yaml .swagger-ui/assets/yaml/swagger.yaml
+          cd ../
+          cp ./todo-app/todo-app/docs/swagger.yaml ./swagger-ui/assets/yaml/swagger.yaml
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "Deploy swagger.yaml by GitHub Actions"
