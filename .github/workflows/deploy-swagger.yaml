@@ -1,0 +1,49 @@
+name: Build and Deploy Swagger
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  build-and-deploy:
+    name: Build swagger ui and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+
+      - name: Set up swaggo
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build swagger
+        run: |
+          cd todo-app
+          swag init
+          cp ./docs/swagger.json /tmp
+
+      - name: clone swagger ui repository
+        env:
+          DEPLOY_KEY: ${{ secrets.SWAGGER_REPO_DEPLOY_KEY }}
+          GIT_SSH_COMMAND: ssh -i ~/deploy_key.pem
+        run: |
+          echo "$DEPLOY_KEY" > ~/deploy_key.pem
+          chmod 600 ~/deploy_key.pem
+          git clone git@github.com:Saza-ku/swagger-ui.git
+
+      - name: Deploy pages
+        env:
+          GIT_SSH_COMMAND: ssh -i ~/deploy_key.pem -o StrictHostKeyChecking=no -F /dev/null
+        run: |
+          cd swagger-ui
+          cp /tmp/swagger.yaml ./assets/yaml/swagger.yaml
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Deploy swagger.yaml by GitHub Actions"
+            git push origin main
+          fi
