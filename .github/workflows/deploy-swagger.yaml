@@ -47,6 +47,7 @@ jobs:
         run: |
           cd ../
           cp ./todo-app/todo-app/docs/swagger.yaml ./swagger-ui/assets/yaml/swagger.yaml
+          cd ./swagger-ui
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "Deploy swagger.yaml by GitHub Actions"
