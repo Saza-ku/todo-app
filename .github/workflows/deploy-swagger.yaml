@@ -48,6 +48,8 @@ jobs:
           cd ../
           cp ./todo-app/todo-app/docs/swagger.yaml ./swagger-ui/assets/yaml/swagger.yaml
           cd ./swagger-ui
+          git config --global user.email "the.latticeheart@gmail.com"
+          git config --global user.name "Saza-ku"
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "Deploy swagger.yaml by GitHub Actions"
