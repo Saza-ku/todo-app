@@ -25,7 +25,6 @@ jobs:
         run: |
           cd todo-app
           swag init
-          cp ./docs/swagger.json /tmp
 
       - name: clone swagger ui repository
         env:
@@ -40,8 +39,7 @@ jobs:
         env:
           GIT_SSH_COMMAND: ssh -i ~/deploy_key.pem -o StrictHostKeyChecking=no -F /dev/null
         run: |
-          cd swagger-ui
-          cp /tmp/swagger.yaml ./assets/yaml/swagger.yaml
+          cp ./todo-app/docs/swagger.yaml .swagger-ui/assets/yaml/swagger.yaml
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "Deploy swagger.yaml by GitHub Actions"
