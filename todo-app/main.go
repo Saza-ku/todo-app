@@ -58,11 +58,6 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 // @title           Todo API
 // @version         1.0
 // @description     This is a Todo-app server.
-// @termsOfService  http://swagger.io/terms/
-
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  s_ueda@yumemi.co.jp
 
 // @host      localhost:8080
 // @BasePath  /
