@@ -1,78 +1,57 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  todo-app
-  
+Description: 'todo-app
+
   Sample SAM Template for todo-app
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+  '
 Globals:
   Function:
     Timeout: 5
-
 Resources:
   TodoAppFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
       Architectures:
-        - x86_64
+      - x86_64
+      Policies: AmazonDynamoDBFullAccess
       Events:
         CatchAll:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api
           Properties:
             Path: /{proxy+}
             Method: ANY
-      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+      Environment:
         Variables:
-          PARAM1: VALUE
+          DYNAMODB_ENDPOINT: ""
+      ImageUri: todoappfunction:go1.x-v1
     Metadata:
-      DockerTag: go1.x-v1
       DockerContext: ./todo-app
+      DockerTag: go1.x-v1
       Dockerfile: Dockerfile.production
+      SamResourceId: TodoAppFunction
 
   TodoTable:
     Type: AWS::DynamoDB::Table
-    Properties: 
+    Properties:
       TableName: Todo
-      AttributeDefinitions: 
-        - AttributeName: ID
-          AttributeType: N
-        - AttributeName: Name
-          AttributeType: S
-        - AttributeName: Description
-          AttributeType: S
-        - AttributeName: Status
-          AttributeType: S
-      KeySchema: 
-        - AttributeName: ID
-          KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: ID
+        AttributeType: N
+      KeySchema:
+      - AttributeName: ID
+        KeyType: HASH
       BillingMode: PAY_PER_REQUEST
 
-  TodoTable:
+  SequenceTable:
     Type: AWS::DynamoDB::Table
-    Properties: 
+    Properties:
       TableName: Sequences
       AttributeDefinitions:
-        - AttributeName: Name
-          AttributeType: S
-        - AttributeName: ID
-          AttributeType: N
-      KeySchema: 
-        - AttributeName: Name
-          KeyType: HASH
+      - AttributeName: Name
+        AttributeType: S
+      KeySchema:
+      - AttributeName: Name
+        KeyType: HASH
       BillingMode: PAY_PER_REQUEST
-
-Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldAPI:
-    Description: "API Gateway endpoint URL for Prod environment for First Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "First Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn

@@ -12,7 +12,7 @@ type Status string
 const (
 	NEW  Status = "new"
 	WIP  Status = "wip"
-	DONE Status = "donw"
+	DONE Status = "done"
 )
 
 func (s Status) Validate() error {

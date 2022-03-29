@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"todo-app/handler"
 	"todo-app/infra"
 	"todo-app/usecase"
@@ -20,7 +21,7 @@ import (
 )
 
 var echoLambda *echolamda.EchoLambda
-var dynamoEndpoint = "http://test_dynamodb-local:8000"
+var dynamoEndpoint = os.Getenv("DYNAMODB_ENDPOINT")
 
 func init() {
 	sess, err := session.NewSession(&aws.Config{
@@ -38,6 +39,7 @@ func init() {
 	controller := handler.NewController(todoUc)
 
 	log.Printf("Echo cold start")
+	fmt.Println(dynamoEndpoint)
 
 	e := echo.New()
 	e.GET("/health", func(c echo.Context) error {
