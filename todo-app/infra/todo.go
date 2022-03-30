@@ -2,7 +2,6 @@ package infra
 
 import (
 	"fmt"
-	"log"
 	"todo-app/domain"
 
 	"github.com/guregu/dynamo"
@@ -48,7 +47,6 @@ func (db *todoDB) AddTodo(todo *domain.Todo) (*domain.Todo, error) {
 	newTodo.ID = id
 
 	err = db.table.Put(newTodo).Run()
-	log.Printf("adding todo end")
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +67,7 @@ func (db *todoDB) EditTodo(todo *domain.Todo) (*domain.Todo, error) {
 	newTodo := TodoToInfra(todo)
 	err := db.table.
 		Update("ID", newTodo.ID).
-		Range("UserName", todo.UserName).
+		If("'UserName' = ?", todo.UserName).
 		Set("Name", newTodo.Name).
 		Set("Description", newTodo.Description).
 		Set("Status", newTodo.Status).
@@ -81,7 +79,9 @@ func (db *todoDB) EditTodo(todo *domain.Todo) (*domain.Todo, error) {
 }
 
 func (db *todoDB) RemoveTodo(id int, username string) error {
-	return db.table.Delete("ID", id).Range("UserName", username).Run()
+	return db.table.Delete("ID", id).
+		If("'UserName' = ?", username).
+		Run()
 }
 
 func (db *todoDB) ExistsTodo(id int, username string) (bool, error) {

@@ -52,13 +52,9 @@ Resources:
       AttributeDefinitions:
       - AttributeName: ID
         AttributeType: N
-      - AttributeName: UserName
-        AttributeType: S
       KeySchema:
       - AttributeName: ID
         KeyType: HASH
-      - AttributeName: UserName
-        KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
 
   SequenceTable:
@@ -106,21 +102,11 @@ Resources:
      Properties:
        DesiredDeliveryMediums:
          - EMAIL
-       Username: !Ref YourEmail1
-       UserPoolId: !Ref UserPool
-
-  UserPoolUser:
-     Type: AWS::Cognito::UserPoolUser
-     Properties:
-       DesiredDeliveryMediums:
-         - EMAIL
-       Username: !Ref YourEmail2
+       Username: !Ref YourEmail
        UserPoolId: !Ref UserPool
 
 Parameters:
-  YourEmail1:
-    Type: String
-  YourEmail2:
+  YourEmail:
     Type: String
 
 Outputs:

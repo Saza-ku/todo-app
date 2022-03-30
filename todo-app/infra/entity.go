@@ -9,6 +9,7 @@ type todo struct {
 	Name        string
 	Description string
 	Status      string
+	UserName    string
 }
 
 func TodoToDomain(todo *todo) *domain.Todo {
@@ -17,6 +18,7 @@ func TodoToDomain(todo *todo) *domain.Todo {
 		Name:        todo.Name,
 		Description: todo.Description,
 		Status:      domain.Status(todo.Status),
+		UserName:    todo.UserName,
 	}
 }
 
@@ -34,6 +36,7 @@ func TodoToInfra(t *domain.Todo) *todo {
 		Name:        t.Name,
 		Description: t.Description,
 		Status:      string(t.Status),
+		UserName:    t.UserName,
 	}
 }
 
