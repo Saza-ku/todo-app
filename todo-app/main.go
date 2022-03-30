@@ -12,6 +12,7 @@ import (
 
 	"github.com/guregu/dynamo"
 	"github.com/labstack/echo/v4"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -53,7 +54,18 @@ func init() {
 	echoLambda = echolamda.New(e)
 }
 
+type claims struct {
+	Username string `mapstructure:"cognito:username"`
+	Email    string
+}
+
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	userAttribute := claims{}
+	_ = mapstructure.Decode(req.RequestContext.Authorizer["claims"], &userAttribute)
+	req.MultiValueHeaders["username"] = make([]string, 1, 1)
+	req.MultiValueHeaders["email"] = make([]string, 1, 1)
+	req.MultiValueHeaders["username"][0] = userAttribute.Username
+	req.MultiValueHeaders["email"][0] = userAttribute.Email
 	return echoLambda.ProxyWithContext(ctx, req)
 }
 

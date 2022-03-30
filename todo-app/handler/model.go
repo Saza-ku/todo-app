@@ -21,6 +21,7 @@ type TodoForm struct {
 	Name        string `json:"name" example:"掃除"`
 	Description string `json:"description" example:"部屋とお風呂"`
 	Status      string `json:"status" enums:"new,wip,todo" example:"new"`
+	UserName    string `swaggerignore:"true"`
 }
 
 type Message struct {
@@ -50,6 +51,7 @@ func todoToDomain(todo *TodoForm) (*domain.Todo, error) {
 		Name:        todo.Name,
 		Description: todo.Description,
 		Status:      domain.Status(todo.Status),
+		UserName:    todo.UserName,
 	}
 	if err := domainTodo.Status.Validate(); err != nil {
 		return nil, err

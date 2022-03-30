@@ -9,11 +9,11 @@ import (
 )
 
 type TodoDB interface {
-	GetTodo() ([]*domain.Todo, error)
-	AddTodo(*domain.Todo) (*domain.Todo, error)
-	EditTodo(*domain.Todo) (*domain.Todo, error)
-	RemoveTodo(int) error
-	ExistsTodo(int) (bool, error)
+	GetTodo(username string) ([]*domain.Todo, error)
+	AddTodo(todo *domain.Todo) (*domain.Todo, error)
+	EditTodo(todo *domain.Todo) (*domain.Todo, error)
+	RemoveTodo(id int, username string) error
+	ExistsTodo(id int, username string) (bool, error)
 }
 
 type todoDB struct {
@@ -27,9 +27,9 @@ func NewTodoDB(db *dynamo.DB) TodoDB {
 	return &todoDB{table: table, sequences: sequences}
 }
 
-func (db *todoDB) GetTodo() ([]*domain.Todo, error) {
+func (db *todoDB) GetTodo(username string) ([]*domain.Todo, error) {
 	var todoList []*todo
-	err := db.table.Scan().All(&todoList)
+	err := db.table.Scan().Filter("'UserName' = ?", username).All(&todoList)
 	if err != nil {
 		return nil, err
 	}
@@ -69,6 +69,7 @@ func (db *todoDB) EditTodo(todo *domain.Todo) (*domain.Todo, error) {
 	newTodo := TodoToInfra(todo)
 	err := db.table.
 		Update("ID", newTodo.ID).
+		Range("UserName", todo.UserName).
 		Set("Name", newTodo.Name).
 		Set("Description", newTodo.Description).
 		Set("Status", newTodo.Status).
@@ -79,12 +80,12 @@ func (db *todoDB) EditTodo(todo *domain.Todo) (*domain.Todo, error) {
 	return todo, nil
 }
 
-func (db *todoDB) RemoveTodo(id int) error {
-	return db.table.Delete("ID", id).Run()
+func (db *todoDB) RemoveTodo(id int, username string) error {
+	return db.table.Delete("ID", id).Range("UserName", username).Run()
 }
 
-func (db *todoDB) ExistsTodo(id int) (bool, error) {
-	count, err := db.table.Get("ID", id).Count()
+func (db *todoDB) ExistsTodo(id int, username string) (bool, error) {
+	count, err := db.table.Get("ID", id).Filter("'UserName' = ?", username).Count()
 	if err != nil {
 		return false, err
 	}

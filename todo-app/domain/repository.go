@@ -1,9 +1,9 @@
 package domain
 
 type TodoRepository interface {
-	GetTodo() ([]*Todo, error)
-	AddTodo(*Todo) (*Todo, error)
-	EditTodo(*Todo) (*Todo, error)
-	RemoveTodo(int) error
-	ExistsTodo(int) (bool, error)
+	GetTodo(username string) ([]*Todo, error)
+	AddTodo(todo *Todo) (*Todo, error)
+	EditTodo(todo *Todo) (*Todo, error)
+	RemoveTodo(id int, username string) error
+	ExistsTodo(id int, username string) (bool, error)
 }

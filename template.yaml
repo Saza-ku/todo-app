@@ -22,6 +22,9 @@ Resources:
           Properties:
             Path: /{proxy+}
             Method: ANY
+            RestApiId: !Ref ApiGatewayApi  # 暗黙的なAPIには注意
+            Auth:
+              Authorizer: CognitoAuthorizer
       Environment:
         Variables:
           DYNAMODB_ENDPOINT: ""
@@ -32,6 +35,16 @@ Resources:
       Dockerfile: Dockerfile.production
       SamResourceId: TodoAppFunction
 
+  ApiGatewayApi:
+    DependsOn: UserPool
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt "UserPool.Arn"
+
   TodoTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -39,9 +52,13 @@ Resources:
       AttributeDefinitions:
       - AttributeName: ID
         AttributeType: N
+      - AttributeName: UserName
+        AttributeType: S
       KeySchema:
       - AttributeName: ID
         KeyType: HASH
+      - AttributeName: UserName
+        KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
 
   SequenceTable:
@@ -55,3 +72,61 @@ Resources:
       - AttributeName: Name
         KeyType: HASH
       BillingMode: PAY_PER_REQUEST
+
+  UserPool:
+     Type: AWS::Cognito::UserPool
+     Properties:
+         AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: false
+         UserPoolName: TestingUsers
+         UsernameAttributes:
+          - email
+         AutoVerifiedAttributes:
+          - email
+         Policies:
+          PasswordPolicy:
+             MinimumLength: 6
+             RequireLowercase: false
+             RequireNumbers: false
+             RequireSymbols: false
+             RequireUppercase: false
+
+  UserPoolTokenClient:
+     Type: AWS::Cognito::UserPoolClient
+     Properties:
+       UserPoolId: !Ref UserPool
+       GenerateSecret: false
+       ExplicitAuthFlows:
+        - ALLOW_ADMIN_USER_PASSWORD_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+  UserPoolUser:
+     Type: AWS::Cognito::UserPoolUser
+     Properties:
+       DesiredDeliveryMediums:
+         - EMAIL
+       Username: !Ref YourEmail1
+       UserPoolId: !Ref UserPool
+
+  UserPoolUser:
+     Type: AWS::Cognito::UserPoolUser
+     Properties:
+       DesiredDeliveryMediums:
+         - EMAIL
+       Username: !Ref YourEmail2
+       UserPoolId: !Ref UserPool
+
+Parameters:
+  YourEmail1:
+    Type: String
+  YourEmail2:
+    Type: String
+
+Outputs:
+  UserPool:
+    Description: "User pool ID"
+    Value: !Ref UserPool
+  UserPoolTokenClient:
+    Description: "User pool client ID"
+    Value: !Ref UserPoolTokenClient

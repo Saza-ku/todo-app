@@ -5,10 +5,10 @@ import (
 )
 
 type TodoUseCase interface {
-	GetTodo() ([]*domain.Todo, error)
-	AddTodo(*domain.Todo) (*domain.Todo, error)
-	EditTodo(*domain.Todo) (*domain.Todo, error)
-	RemoveTodo(int) error
+	GetTodo(username string) ([]*domain.Todo, error)
+	AddTodo(todo *domain.Todo) (*domain.Todo, error)
+	EditTodo(todo *domain.Todo) (*domain.Todo, error)
+	RemoveTodo(id int, username string) error
 }
 
 type todoUseCase struct {
@@ -19,8 +19,8 @@ func NewTodoUseCase(r domain.TodoRepository) TodoUseCase {
 	return &todoUseCase{todoRepo: r}
 }
 
-func (uc *todoUseCase) GetTodo() ([]*domain.Todo, error) {
-	todoList, err := uc.todoRepo.GetTodo()
+func (uc *todoUseCase) GetTodo(username string) ([]*domain.Todo, error) {
+	todoList, err := uc.todoRepo.GetTodo(username)
 	if err != nil {
 		return nil, domain.NewInfraError(err)
 	}
@@ -36,7 +36,7 @@ func (uc *todoUseCase) AddTodo(todo *domain.Todo) (*domain.Todo, error) {
 }
 
 func (uc *todoUseCase) EditTodo(todo *domain.Todo) (*domain.Todo, error) {
-	exists, err := uc.todoRepo.ExistsTodo(todo.ID)
+	exists, err := uc.todoRepo.ExistsTodo(todo.ID, todo.UserName)
 	if err != nil {
 		return nil, domain.NewInfraError(err)
 	}
@@ -51,8 +51,8 @@ func (uc *todoUseCase) EditTodo(todo *domain.Todo) (*domain.Todo, error) {
 	return editedTodo, nil
 }
 
-func (uc *todoUseCase) RemoveTodo(id int) error {
-	exists, err := uc.todoRepo.ExistsTodo(id)
+func (uc *todoUseCase) RemoveTodo(id int, username string) error {
+	exists, err := uc.todoRepo.ExistsTodo(id, username)
 	if err != nil {
 		return domain.NewInfraError(err)
 	}
@@ -60,7 +60,7 @@ func (uc *todoUseCase) RemoveTodo(id int) error {
 		return domain.NewNotFoundError(id)
 	}
 
-	err = uc.todoRepo.RemoveTodo(id)
+	err = uc.todoRepo.RemoveTodo(id, username)
 	if err != nil {
 		return domain.NewInfraError(err)
 	}

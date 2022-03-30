@@ -29,11 +29,13 @@ type controller struct {
 // @Tags     todo
 // @Accept   json
 // @Produce  json
+// @Param    authorization  header      string  true  "ID token"
 // @Success  200  {object}  handler.TodoListDTO
 // @Failure  500  {object}  handler.Message
 // @Router   /todo [get]
 func (ctr *controller) GetTodo(c echo.Context) error {
-	todoList, err := ctr.todoUseCase.GetTodo()
+	username := c.Request().Header.Get("username")
+	todoList, err := ctr.todoUseCase.GetTodo(username)
 	if err != nil {
 		fmt.Println(err)
 		return handleError(c, err)
@@ -47,6 +49,7 @@ func (ctr *controller) GetTodo(c echo.Context) error {
 // @Accept   json
 // @Produce  json
 // @Param    todo  body      handler.TodoForm  true  "new todo"
+// @Param    authorization  header      string  true  "ID token"
 // @Success  200   {object}  handler.TodoListDTO
 // @Failure  400   {object}  handler.Message
 // @Failure  500   {object}  handler.Message
@@ -59,6 +62,9 @@ func (ctr *controller) AddTodo(c echo.Context) error {
 				Message: fmt.Sprintf("validation failed: %s", err.Error()),
 			})
 	}
+
+	username := c.Request().Header.Get("username")
+	todoForm.UserName = username
 
 	todo, err := todoToDomain(todoForm)
 	if err != nil {
@@ -79,6 +85,7 @@ func (ctr *controller) AddTodo(c echo.Context) error {
 // @Produce  json
 // @Param    todo  body      handler.TodoForm  true  "edited todo"
 // @Param    id    path      int               true  "id of todo to edit"
+// @Param    authorization  header      string  true  "ID token"
 // @Success  200   {object}  handler.TodoListDTO
 // @Failure  400   {object}  handler.Message
 // @Failure  404   {object}  handler.Message
@@ -92,6 +99,9 @@ func (ctr *controller) EditTodo(c echo.Context) error {
 				Message: fmt.Sprintf("validation failed: %s", err.Error()),
 			})
 	}
+
+	username := c.Request().Header.Get("username")
+	todoForm.UserName = username
 
 	todo, err := todoToDomain(todoForm)
 	if err != nil {
@@ -111,6 +121,7 @@ func (ctr *controller) EditTodo(c echo.Context) error {
 // @Accept   json
 // @Produce  json
 // @Param    id   path      int  true  "id of todo to remove"
+// @Param    authorization  header      string  true  "ID token"
 // @Success  200  {object}  handler.Message
 // @Failure  404  {object}  handler.Message
 // @Failure  500  {object}  handler.Message
@@ -125,7 +136,9 @@ func (ctr *controller) RemoveTodo(c echo.Context) error {
 			})
 	}
 
-	err = ctr.todoUseCase.RemoveTodo(id)
+	username := c.Request().Header.Get("username")
+
+	err = ctr.todoUseCase.RemoveTodo(id, username)
 	if err != nil {
 		return handleError(c, err)
 	}
