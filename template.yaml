@@ -105,6 +105,47 @@ Resources:
        Username: !Ref YourEmail
        UserPoolId: !Ref UserPool
 
+  WebACLAssociationWithApiGateway:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Sub
+        - arn:aws:apigateway:ap-northeast-1::/restapis/${ApiGatewayID}/stages/Prod
+        - ApiGatewayID: !Ref ApiGatewayApi
+      WebACLArn: !GetAtt "WebACLForApiGateway.Arn"
+
+  WebACLForApiGateway:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: "WebACLForApiGateway"
+      Scope: REGIONAL
+      DefaultAction:
+        Block: {}
+      Rules:
+      - Name: "AllowIPRule"
+        Action:
+          Allow: {}
+        Priority: 1
+        Statement:
+          IPSetReferenceStatement:
+            Arn : !GetAtt AllowIPSet.Arn
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          SampledRequestsEnabled: false
+          MetricName: WebACLRuleIPSetMetric
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: false
+        MetricName: WebACLMetric
+
+  AllowIPSet:
+    Type: "AWS::WAFv2::IPSet"
+    Properties:
+      Name: "VPNIPSet"
+      Scope: "REGIONAL"
+      IPAddressVersion: IPV4
+      Addresses:
+        - 52.192.209.10/32
+
 Parameters:
   YourEmail:
     Type: String
