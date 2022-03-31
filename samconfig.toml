@@ -9,4 +9,4 @@ region = "ap-northeast-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 image_repositories = ["TodoAppFunction=280107060642.dkr.ecr.ap-northeast-1.amazonaws.com/uedatodoapp594f9282/todoappfunctiond1342d42repo"]
-disable_rollback = true
+disable_rollback = false

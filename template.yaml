@@ -44,6 +44,12 @@ Resources:
         Authorizers:
           CognitoAuthorizer:
             UserPoolArn: !GetAtt "UserPool.Arn"
+      Domain:
+        DomainName: ueda-todo-app.sandbox.yumemi.io
+        CertificateArn: !Ref CertificateArn
+        EndpointConfiguration: EDGE
+        Route53:
+          HostedZoneId: !Ref HostedZoneId
 
   TodoTable:
     Type: AWS::DynamoDB::Table
@@ -148,6 +154,10 @@ Resources:
 
 Parameters:
   YourEmail:
+    Type: String
+  CertificateArn:
+    Type: String
+  HostedZoneId:
     Type: String
 
 Outputs:
